@@ -1,8 +1,5 @@
-from typing import Dict
-
-
 class Food:
-    def __init__(self, data: Dict):
+    def __init__(self, data: Dict) -> None:
         self.name: str = data["name"]
         self.protein: float = data["protein"]
         self.carbs: float = data["carbs"]

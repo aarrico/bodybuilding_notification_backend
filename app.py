@@ -1,4 +1,4 @@
-from models import Food
+from models.food import Food
 import os
 
 from flask import Flask, request
