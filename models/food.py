@@ -1,6 +1,6 @@
-from typing import Dict
+import db
 
-from flask_restful import Resource, abort
+from flask_classful import FlaskView
 
 
 def abort_if_food_doesnt_exist(food_name: str):
@@ -8,17 +8,25 @@ def abort_if_food_doesnt_exist(food_name: str):
         abort(404, message="{} doesn't exist".format(food_name))
 
 
-class Food(Resource):
-    def __init__(self, data: Dict) -> None:
-        self.name: str = data["name"]
-        self.protein: float = data["protein"]
-        self.carbs: float = data["carbs"]
-        self.fat: float = data["fat"]
-        self.serving_type: str = data["servingType"]
+class Food:
+    def __init__(
+        self, name: str, protein: float, carbs: float, fat: float, serving_type: str
+    ) -> None:
+        self.name: str = name
+        self.protein: float = protein
+        self.carbs: float = carbs
+        self.fat: float = fat
+        self.serving_type: str = serving_type
 
     @staticmethod
-    def from_dict(source):
-        return Food(source)
+    def from_dict(data):
+        return Food(
+            data["name"],
+            data["protein"],
+            data["carbs"],
+            data["fat"],
+            data["servingType"],
+        )
 
     def to_dict(self):
         return {
@@ -38,17 +46,20 @@ class Food(Resource):
                 servingType={self.serving_type}\
             )"
 
-    def get(self, food_name: str):
-        abort_if_food_doesnt_exist(food_name)
-        return Food(db.get("food", food_name))
 
-    def delete(self, food_name: str):
-        abort_if_food_doesnt_exist(food_name)
-        db.delete("food", food_name)
+class FoodView(FlaskView):
+    def index(self):
+        return db.get_all("food")
+
+    def get(self, name: str):
+        abort_if_food_doesnt_exist(name)
+        return Food.from_dict(db.get("food", name))
+
+    def delete(self, name: str):
+        abort_if_food_doesnt_exist(name)
+        db.delete("food", name)
         return "", 204
 
-    def put(self, food_name: str):
-        args = parser.parse_args()
-        food = {"food": args["food"]}
-        db.put("food", food_name)
-        return food, 201
+    def post(self, food: Food):
+        db.add(collection="food", resource=food.to_dict())
+        return 201

@@ -1,41 +1,46 @@
-from models.food import Food
+import json
 import os
 
-from flask import Flask, request
+from firebase_admin import auth
+from firebase_admin.auth import ExpiredIdTokenError
 
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
+import db
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 
-# Use the application default credentials
-cred = credentials.ApplicationDefault()
-firebase_admin.initialize_app(
-    cred,
-    {
-        "projectId": "bodybuilding-notification-app",
-    },
-)
-
-db = firestore.client()
+def get_user():
+    id_token = request.headers["Authorization"]
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        return decoded_token["uid"]
+    except ExpiredIdTokenError:
+        return jsonify({"error": "ID Token expired."})
 
 
-@app.route("/")
-def index():
+@app.route("/food/<name>", methods=["GET", "POST"])
+def food(name: str):
+    uid = get_user()
 
-    return ""
+    if request.method == "GET":
+        return jsonify(db.get(collection="food", resource_id=name))
+
+    db.add(collection="food", resource=request.json)
 
 
-@app.route("/food", methods=["GET", "POST"])
-def food():
-    if request.method == "POST":
-        food = Food(request.json)
-        doc_ref = db.collection(u"foods").document(food.name).set(food.to_dict())
-
-    food_json = request.json
-    return food_json
+@app.errorhandler(ExpiredIdTokenError)
+def handle_exception(e):
+    response = e.get_response()
+    response.data = json.dumps(
+        {
+            "code": e.code,
+            "name": e.name,
+            "description": e.description,
+        }
+    )
+    response.content_type = "application/json"
+    return response
 
 
 if __name__ == "__main__":
