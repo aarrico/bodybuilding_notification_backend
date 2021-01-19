@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import firebase_admin
 from firebase_admin import credentials
@@ -26,13 +26,20 @@ def get_all(collection: str) -> List:
     return list(docs)
 
 
-def get(collection: str, resource_id: str) -> Dict:
-    doc = db.collection(collection).document(resource_id).get()
-    return doc.to_dict()
+def get(collection: str, resource_id: str) -> Optional[Dict]:
+    try:
+        doc = db.collection(collection).document(resource_id).get()
+        return doc.to_dict()
+    except Exception as e:
+        return None
 
 
-def add(collection: str, resource: Dict) -> None:
-    db.collection(collection).document(resource["id"]).set(resource)
+def add(collection: str, resource: Dict) -> bool:
+    try:
+        db.collection(collection).document(resource["id"]).set(resource)
+        return True
+    except Exception as e:
+        return False
 
 
 def delete(collection: str, resource_id: str) -> None:

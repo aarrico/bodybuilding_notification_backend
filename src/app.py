@@ -19,14 +19,18 @@ def get_user():
         return jsonify({"error": "ID Token expired."})
 
 
-@app.route("/food/<name>", methods=["GET", "POST"])
+@app.route("/food", defaults={"name": None}, methods=["POST"])
+@app.route("/food/<name>", methods=["GET"])
 def food(name: str):
     uid = get_user()
 
     if request.method == "GET":
-        return jsonify(db.get(collection="food", resource_id=name))
+        return jsonify(db.get(collection="food", resource_id=name)), 200
 
-    db.add(collection="food", resource=request.json)
+    if db.add(collection="food", resource=request.json):
+        return {"success": True}, 201
+    else:
+        return {"success": False}, 500
 
 
 @app.errorhandler(ExpiredIdTokenError)

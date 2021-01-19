@@ -16,6 +16,6 @@ def client():
         yield client
 
 
-def test_empty_db(client):
-    rv = client.get("/")
+def test_getting_food_from_db(client):
+    rv = client.get("/food/chicken")
     assert rv.data == ""
