@@ -7,6 +7,8 @@ from firebase_admin.auth import ExpiredIdTokenError
 import db
 from flask import Flask, request, jsonify
 
+from src.models.food import Food
+
 app = Flask(__name__)
 
 
@@ -19,15 +21,20 @@ def get_user():
         return jsonify({"error": "ID Token expired."})
 
 
-@app.route("/food", defaults={"name": None}, methods=["POST"])
-@app.route("/food/<name>", methods=["GET"])
-def food(name: str):
+@app.route("/foods", defaults={"name": None}, methods=["GET, POST"])
+@app.route("/foods/<name>", methods=["GET"])
+def foods(name: str):
     uid = get_user()
 
     if request.method == "GET":
-        return jsonify(db.get(collection="food", resource_id=name)), 200
+        food = db.get(collection="foods", resource_id=name)
+        if food:
+            return jsonify(food), 200
+        return jsonify({"error:", f"{name} not found in database"}), 404
 
-    if db.add(collection="food", resource=request.json):
+    data = request.json
+    food = Food(data["name"], data["protein"], data["carbs"], data["fat"], data["servingSize"], data["servingType"])
+    if db.add(collection="foods", resource=food.to_dict()):
         return {"success": True}, 201
     else:
         return {"success": False}, 500

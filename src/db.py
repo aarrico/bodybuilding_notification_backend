@@ -29,7 +29,9 @@ def get_all(collection: str) -> List:
 def get(collection: str, resource_id: str) -> Optional[Dict]:
     try:
         doc = db.collection(collection).document(resource_id).get()
-        return doc.to_dict()
+        if doc.exists:
+            return doc.to_dict()
+        return None
     except Exception as e:
         return None
 
