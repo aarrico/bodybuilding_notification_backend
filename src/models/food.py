@@ -1,14 +1,14 @@
 class Food:
     def __init__(
         self,
-        name: str,
+        id: str,
         protein: float,
         carbs: float,
         fat: float,
         serving_size: float,
         serving_type: str,
     ) -> None:
-        self.name: str = name
+        self.id: str = id
         self.protein: float = protein / serving_size
         self.carbs: float = carbs / serving_size
         self.fat: float = fat / serving_size
@@ -17,7 +17,7 @@ class Food:
     @staticmethod
     def from_dict(data):
         return Food(
-            data["name"],
+            data["id"],
             data["protein"],
             data["carbs"],
             data["fat"],
@@ -26,7 +26,7 @@ class Food:
 
     def to_dict(self):
         return {
-            "name": self.name,
+            "id": self.id,
             "protein": self.protein,
             "carbs": self.carbs,
             "fat": self.fat,
@@ -35,7 +35,7 @@ class Food:
 
     def __repr__(self):
         return f"Food(\
-                name={self.name}, \
+                id={self.id}, \
                 protein={self.protein}, \
                 carbs={self.carbs}, \
                 fat={self.fat}, \

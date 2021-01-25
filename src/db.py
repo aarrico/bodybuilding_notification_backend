@@ -22,8 +22,8 @@ def does_resource_exist(collection: str, resource_id: str):
 
 
 def get_all(collection: str) -> List:
-    docs = db.collection(collection).list_documents()
-    return list(docs)
+    all_docs = [doc.to_dict() for doc in db.collection(collection).stream()]
+    return all_docs
 
 
 def get(collection: str, resource_id: str) -> Optional[Dict]:

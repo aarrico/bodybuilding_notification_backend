@@ -12,10 +12,10 @@ class Meal:
         self.order: int = order
 
     def add_food(self, food: Food, amount: float) -> None:
-        if food.name not in self.foods:
-            self.foods[food.name] = amount
+        if food.id not in self.foods:
+            self.foods[food.id] = amount
         else:
-            self.foods[food.name] += amount
+            self.foods[food.id] += amount
 
     @staticmethod
     def from_dict(data):

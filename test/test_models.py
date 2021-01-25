@@ -9,7 +9,7 @@ def test_new_food():
     THEN check the name, protein, carbs, fat, serving_type fields are defined correctly
     """
     food = Food(
-        name="chicken",
+        id="chicken",
         protein=53.4,
         carbs=0,
         fat=6.2,
@@ -20,4 +20,4 @@ def test_new_food():
     assert math.isclose(food.carbs, 0)
     assert math.isclose(food.fat, 0.036046511627907)
     assert food.serving_type == "gram"
-    assert food.name == "chicken"
+    assert food.id == "chicken"

@@ -21,17 +21,8 @@ def get_user():
         return jsonify({"error": "ID Token expired."})
 
 
-@app.route("/foods", defaults={"name": None}, methods=["GET, POST"])
-@app.route("/foods/<name>", methods=["GET"])
-def foods(name: str):
-    uid = get_user()
-
-    if request.method == "GET":
-        food = db.get(collection="foods", resource_id=name)
-        if food:
-            return jsonify(food), 200
-        return jsonify({"error:", f"{name} not found in database"}), 404
-
+@app.route("/foods", methods=["POST"])
+def add_food():
     data = request.json
     food = Food(data["name"], data["protein"], data["carbs"], data["fat"], data["servingSize"], data["servingType"])
     if db.add(collection="foods", resource=food.to_dict()):
@@ -40,13 +31,26 @@ def foods(name: str):
         return {"success": False}, 500
 
 
+@app.route("/foods", methods=["GET"])
+def food(name: str):
+    #uid = get_user()
+    name = request.args.get('name')
+    if name:
+        food = db.get(collection="foods", resource_id=name)
+        if food:
+            return jsonify(food), 200
+        return jsonify({"error:", f"{name} not found in database"}), 404
+    else:
+        return jsonify(db.get_all("foods")), 200
+
+
 @app.errorhandler(ExpiredIdTokenError)
 def handle_exception(e):
     response = e.get_response()
     response.data = json.dumps(
         {
             "code": e.code,
-            "name": e.name,
+            "name": e.id,
             "description": e.description,
         }
     )
