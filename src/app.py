@@ -24,7 +24,7 @@ def get_user():
 @app.route("/foods", methods=["POST"])
 def add_food():
     data = request.json
-    food = Food(data["name"], data["protein"], data["carbs"], data["fat"], data["servingSize"], data["servingType"])
+    food = Food(data["id"], data["protein"], data["carbs"], data["fat"], data["servingSize"], data["servingType"])
     if db.add(collection="foods", resource=food.to_dict()):
         return {"success": True}, 201
     else:
